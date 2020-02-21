@@ -20,14 +20,12 @@ import org.scalatest.matchers.should.Matchers
 import org.scalaexercises.definitions._
 import org.scalatest.flatspec.AnyFlatSpec
 import pureconfig.ConfigSource
-import pureconfiglib.Domain.Example
+import pureconfiglib.Domain.{Example, multiExampleSource}
 import pureconfig._
-import pureconfig.generic.auto._
 
-import scala.tools.nsc.interpreter.Results.Result
 import scala.util.Try
 
-/** @param name section_title
+/** @param name Load Config
   */
 object LoadingConfig extends AnyFlatSpec with Matchers with Section {
 
@@ -103,23 +101,29 @@ object LoadingConfig extends AnyFlatSpec with Matchers with Section {
     nonExistingSource.recoverWith { case _ => defaultsSource }.loadOrThrow[Example] shouldBe defaultExample
   }
 
-  
-  /* First thing you have to do is to import `pureconfig.generic.auto` and define data types and a case class to hold the configuration.
+
+  /** You may want your application config to be loaded from a specific path in the config files,
+   * e.g. if you want to have configs for multiple apps (example configurations) in the same sources.
+   * ConfigSource instances have an `.at` method you can use to specify where you want the config to be read from:
    * {{{
-   *   final case class City(value: Int) extends AnyVal
-   *   case class Flat(
-   *   isCurrentlyRented: Boolean,
-   *   city: Port,
-   *   country: MyAdt,
-   *   tenantNames: List[Double],
-   *   tenantAges: Map[String, Int],
-   *   option: Option[String])
+    val multiExampleSource = ConfigSource.string("""
+    example-a: {
+        name: a
+        number: 6
+    }
+    example-b: {
+        name: b
+        number: 7
+    }
+    """
+    )
+   multiExampleSource.at("example-a").load[Example]
    * }}}
-   *
-   *  to read a config from an `application.conf resource and convert it to a case class.
-   *
+   *   *
    */
-  def functionAssert(res0: Boolean): Unit = {
-    true shouldBe res0
+  def multipleSources(example: Example): Unit = {
+    val exampleB = multiExampleSource.at("example-b").load[Example]
+    exampleB shouldBe Right(example)
   }
+
 }

@@ -26,10 +26,6 @@ import shapeless.HNil
 
 class LoadingConfigSpec extends RefSpec with Checkers {
 
-  def `function asserts` = {
-    check(Test.testSuccess(LoadingConfig.functionAssert _, true :: HNil))
-  }
-
   def `check values using loadOrThrow` = {
     check(Test.testSuccess(LoadingConfig.loadOrThrowExample _, "first" :: 1 :: HNil))
   }
@@ -50,4 +46,7 @@ class LoadingConfigSpec extends RefSpec with Checkers {
     check(Test.testSuccess(LoadingConfig.optionalConfig _, Example("fifth", 5) :: HNil))
   }
 
+  def `checks the a config can be chosen when having multiple sources` = {
+    check(Test.testSuccess(LoadingConfig.multipleSources _, Example("b", 7) :: HNil))
+  }
 }
