@@ -1,0 +1,5 @@
+package pureconfiglib
+
+object Domain {
+
+}
