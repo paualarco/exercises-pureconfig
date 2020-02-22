@@ -22,7 +22,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import pureconfig.ConfigSource
 import pureconfiglib.Domain.{Example, multiExampleSource}
 import pureconfig._
-
+import pureconfig.generic.auto._
 import scala.util.Try
 
 /** @param name Load Config
