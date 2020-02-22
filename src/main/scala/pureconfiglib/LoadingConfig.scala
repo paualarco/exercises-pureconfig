@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,7 @@ object LoadingConfig extends AnyFlatSpec with Matchers with Section {
   /** You may want your application config to be loaded from a specific path in the config files,
    * e.g. if you want to have configs for multiple apps (example configurations) in the same sources.
    * ConfigSource instances have an `.at` method you can use to specify where you want the config to be read from:
+   *
    * {{{
     val multiExampleSource = ConfigSource.string("""
     example-a: {
@@ -117,6 +118,7 @@ object LoadingConfig extends AnyFlatSpec with Matchers with Section {
     }
     """
     )
+
    multiExampleSource.at("example-a").load[Example]
    * }}}
    *   *

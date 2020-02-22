@@ -27,5 +27,5 @@ object Domain {
         number: 7
     }
 """)
-  
+
 }
