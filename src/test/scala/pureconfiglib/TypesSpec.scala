@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package templatelib
+package pureconfiglib
 
 import org.scalacheck.ScalacheckShapeless._
 import org.scalaexercises.Test
-import org.scalatest.refspec.RefSpec
 import org.scalatestplus.scalacheck.Checkers
-import pureconfig.ConfigSource
-import pureconfiglib.SupportedTypes
+import org.scalatest.refspec.RefSpec
 import shapeless.HNil
-
-import scala.concurrent.duration._
 
 class TypesSpec extends RefSpec with Checkers {
 
@@ -42,6 +38,14 @@ class TypesSpec extends RefSpec with Checkers {
 
   def `check time config` = {
     check(Test.testSuccess(SupportedTypes.loadTimeConfig _,  2 :: 2020 :: 29 :: 13 :: 21 :: 30 :: HNil))
+  }
+
+  def `load optional config` = {
+    check(Test.testSuccess(SupportedTypes.loadOptionalConfig _, Option("PureOption") :: None :: Option(101) :: HNil))
+  }
+
+  def `load collections config` = {
+    check(Test.testSuccess(SupportedTypes.loadCollectionsConfig _, "src/main/resources" :: HNil))
   }
 
 }

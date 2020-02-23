@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package templatelib
+package pureconfiglib
 
 import org.scalacheck.ScalacheckShapeless._
 import org.scalaexercises.Test

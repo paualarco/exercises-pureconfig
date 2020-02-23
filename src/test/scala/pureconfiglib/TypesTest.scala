@@ -1,7 +1,10 @@
-package templatelib
+package pureconfiglib
 
+import org.scalaexercises.Test
 import org.scalatest.FlatSpec
 import pureconfiglib.SupportedTypes
+import shapeless.HNil
+
 import scala.concurrent.duration._
 class TypesTest extends FlatSpec{
 
@@ -10,8 +13,6 @@ class TypesTest extends FlatSpec{
   }
 
   "path config" should "be infered" in {
-    SupportedTypes.loadPathsConfig("src/main/resources", "src/main/resources/application.conf" , "https://pureconfig.github.io" , "https://pureconfig.github.io/docs/index.html")
+    SupportedTypes.loadPathsConfig("src/main/resources", "src/main/resources/application.conf", "https://pureconfig.github.io", "https://pureconfig.github.io/docs/index.html")
   }
-
-
 }
