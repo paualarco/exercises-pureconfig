@@ -24,10 +24,16 @@ import java.time.Month.FEBRUARY
 import org.scalaexercises.definitions._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import pureconfig.ConvertHelpers.catchReadError
 import pureconfig.generic.ProductHint
 import pureconfig.{ConfigSource, _}
-import pureconfiglib.Domain.{CollectionsConfig, DurationConfig, OptionConfig, PathConfig, PrimitivesConf, TimeConfig}
+import pureconfiglib.Domain.{
+  CollectionsConfig,
+  DurationConfig,
+  OptionConfig,
+  PathConfig,
+  PrimitivesConf,
+  TimeConfig
+}
 import pureconfig.configurable._
 
 import scala.language.postfixOps
@@ -35,22 +41,26 @@ import scala.concurrent.duration._
 import pureconfig.generic.auto._
 
 /** @param name Supported Types
-  */
+ */
 object SupportedTypes extends AnyFlatSpec with Matchers with Section {
 
   implicit def hint[T] =
     ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
   /** PureConfig comes with baked-in support for many types, most of them from the standard Java and Scala libraries.
-    *
-    * `String`, `Boolean`, `Double`, `Float`, `Int`, `Long`, `Short`, `Char`.
-    *
-    * {{{
-    * case class PrimitivesConf(string: String, bool: Boolean, double: Double, float: Float, int: Int, long: Long, short: Short, char: Char)
-    * }}}
-    *
-    *
-    * */
+   * In this section we will see an very complete overview of examples with most of the types that pureconfig supports.
+   * Each exercise has a `case class` that wraps the values loaded from the configuration source on it.
+   *
+   * Let's then start with the more basic types, the primitive ones:
+   * `String`, `Boolean`, `Double`, `Float`, `Int`, `Long`, `Short`, `Char`.
+   *
+   * In which the wrapper configuration case class in this case is called ´PrimitivesConf´.
+   * {{{
+   * case class PrimitivesConf(string: String, bool: Boolean, double: Double, float: Float, int: Int, long: Long, short: Short, char: Char)
+   * }}}
+   *
+   *
+   * */
   def loadPrimitivesConfig(string: String,
                            bool: Boolean,
                            double: Double,
@@ -71,7 +81,6 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
         "char = p," +
         " }")
     val primitivesConfig = primitivesSource.loadOrThrow[PrimitivesConf]
-    println(primitivesConfig)
     primitivesConfig.string shouldBe string
     primitivesConfig.bool shouldBe bool
     primitivesConfig.double shouldBe double
@@ -80,64 +89,88 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
     primitivesConfig.long shouldBe long
     primitivesConfig.short shouldBe short
     primitivesConfig.char shouldBe char
-    //hint dobule, float and long can be identified by its suffix respectively: d, f, L
+    //hint double, float and long can be identified by its suffix respectively: d, f, L
   }
 
   /**
-    * `URL`, `URI`,`java.util.UUID`,`java.nio.file.Path`, `java.io.File`
-    * {{{
-    * case class PathConfig(path: java.nio.file.Path, file: java.io.File, url: URL, uri: URI)
-    * }}}
-    *
-    * */
-  def loadPathsConfig(path: String,
-                      file: String,
-                      url: String,
-                      uri: String): Unit = {
+   * The default behavior of ConfigReaders that are derived in PureConfig is to return a KeyNotFound
+   * failure when a required key is missing unless its type is an Option, in which case it is read as a None.
+   * {{{
+   * case class OptionConfig(optionA: Option[String], optionB: Option[String], optionC: Option[Int])
+   * }}}
+   *
+   **/
+  def loadOptionalConfig(optionA: Option[String],
+                         optionB: Option[String],
+                         optionC: Option[Int]): Unit = {
+    val configSource =
+      ConfigSource.string("{ optionA = PureOption, optionC: 101 }")
+    val optionConfig: OptionConfig = configSource.loadOrThrow[OptionConfig]
+    optionConfig.optionA shouldBe optionA
+    optionConfig.optionB shouldBe optionB
+    optionConfig.optionC shouldBe optionC
+  }
+
+  /**
+   * Usually, collection types are needed to be defined in configuration files, in which as you may imagine, pureconfig allows to work with them too.
+   * The following exercise shows an example for `List, `Set` and `Map[Int, String]` from the `scala.collection` package.
+   *
+   * For some types, PureConfig cannot automatically derive a reader because there are multiple ways to convert a configuration value to them.
+   * For instance, reading maps with non-string keys, unless a way to convert the keys to and from strings is provided, PureConfig won’t be able to derive a reader.
+   *
+   * {{{
+   * case class CollectionsConfig(
+   * list: List[Char],
+   * set: Set[Int],
+   * map: Map[Int, String])
+   * }}}
+   *
+   **/
+  def loadCollectionsConfig(list: List[Char],
+                            set: Set[Int],
+                            map: Map[Int, String]): Unit = {
+    import pureconfig.ConvertHelpers._
+    implicit val mapReader =
+      genericMapReader[Int, String](catchReadError(_.toInt))
     val configSource = ConfigSource.string(
       "{ " +
-        "path = src/main/resources, " +
-        "file: src/main/resources/application.conf, " +
-        "url: \"https://pureconfig.github.io\", " +
-        "uri: \"https://pureconfig.github.io/docs/index.html\"" +
+        "list: [ a, e, i, o, u ], " +
+        "set: [ 1, 2, 3, 4, 5 ], " +
+        "map : { 1: A, 2: E, 3: I, 4: O, 5: U} " +
         "}")
-    val pathConfig: PathConfig = configSource.loadOrThrow[PathConfig]
-    pathConfig.path shouldBe java.nio.file.Paths.get(path)
-    pathConfig.file shouldBe new java.io.File(file)
-    pathConfig.url shouldBe new URL(url)
-    pathConfig.uri shouldBe new URI(uri)
+    val collectionsConfig = configSource.loadOrThrow[CollectionsConfig]
+    collectionsConfig.list shouldBe list
+    collectionsConfig.set shouldBe set
+    collectionsConfig.map shouldBe map
   }
 
   /**
-    * `Duration`, `FiniteDuration`
-    * import scala.concurrent.durations._
-    * {{{
-  case class DurationConfig(duration: Duration, finiteDuration: FiniteDuration)
-    * }}}
-    *
-    * */
-  def loadDurationConfig(duration: Int, finiteDuration: Int): Unit = {
-    val configSource = ConfigSource.string(
-      "{ " +
-        "duration = 510 milliseconds, " +
-        "finiteDuration: 1 hour" +
-        "}")
-    val timeConfig = configSource.loadOrThrow[DurationConfig]
-    timeConfig.duration shouldBe (duration milliseconds)
-    timeConfig.finiteDuration shouldBe (finiteDuration hour)
-  }
-
-  /**
-    * `Duration`, `FiniteDuration`, `java.time._`
-    *
-    * import pureconfig.configurable._
-    * implicit val localDateConvert = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
-    *
-    * {{{
-    * case class TimeConfig(duration: Duration, finiteDuration: FiniteDuration, dayOfWeek: DayOfWeek, monthDay: MonthDay, month: Month, year: Year, localDate: LocalDate, localDateTime: LocalDateTime)
-    * }}}
-    *
-    * */
+   * When working with dates in configuration, it is also needed to create converters for reading them.
+   * For example, `LocalDate` in PureConfig cannot derive a reader because there are multiple
+   * `DateTimeFormatters that can be used to convert a string into a `LocalDate.
+   * Examples of different formats are `yyyy-mm-dd`, e.g. "2016-01-01"`, and `yyyymmdd`, e.g. `"20160101"`.
+   *
+   * For those types, PureConfig provides a way to create readers from the necessary parameters. `
+   * These methods can be found under the package pureconfig.configurable.
+   * Once the output of a `pureconfig.configurable` method for a certain type is in scope, PureConfig can start using that configured reader.
+   *
+   *
+   * {{{
+   * import pureconfig.configurable._
+   * implicit val localDateConvert = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
+   *
+   * case class TimeConfig(
+   * duration: Duration,
+   * finiteDuration: FiniteDuration,
+   * dayOfWeek: DayOfWeek,
+   * monthDay: MonthDay,
+   * month: Month,
+   * year: Year,
+   * localDate: LocalDate,
+   * localDateTime: LocalDateTime)
+   * }}}
+   *
+   **/
   def loadTimeConfig(month: Int,
                      year: Int,
                      day: Int,
@@ -161,46 +194,50 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
   }
 
   /**
-   * `URL`, `URI`,`java.util.UUID`,`java.nio.file.Path`, `java.io.File`
+   * All those duration types within the scala package `scala.concurrent.durations` also can be read in this format from config sources,
+   * in this case with no need of using any converter.
+   *
+   * {{{
+   * case class DurationConfig(duration: Duration, finiteDuration: FiniteDuration)
+   * }}}
+   *
+   **/
+  def loadDurationConfig(finiteDuration: Int): Unit = {
+
+    val configSource = ConfigSource.string(
+      "{ " +
+        "duration = Inf, " +
+        "finiteDuration: 1 hour" +
+        "}")
+    val timeConfig = configSource.loadOrThrow[DurationConfig]
+    timeConfig.duration shouldBe Duration.Inf
+    timeConfig.finiteDuration shouldBe (finiteDuration hour)
+  }
+
+  /** Another use case very common when dealing with configurations is to find string paths and urls,
+   * in which PureConfig translate them into `java.nio.file.Path`, `java.io.File`, `java.net.URL`, `java.net.URI`.
+   * 
    * {{{
    * case class PathConfig(path: java.nio.file.Path, file: java.io.File, url: URL, uri: URI)
    * }}}
    *
    * */
-  def loadCollectionsConfig(path: String): Unit = {
-    import pureconfig.ConvertHelpers._
-    implicit val strMapReader = genericMapReader[String, Int](catchReadError(_.toString))
-    val configSource = ConfigSource.string("{ map : { London: UK, Tokyo: Japan, Miami: US } }")
-    val collectionsConfig = configSource.loadOrThrow[CollectionsConfig]
-    collectionsConfig.map shouldBe Map("London" -> "UK", "Tokyo" -> "Japan", "Miami" -> "US") // Map(key -> field, ...)
+  def loadPathsConfig(path: String,
+                      file: String,
+                      url: String,
+                      uri: String): Unit = {
+    val configSource = ConfigSource.string(
+      "{ " +
+        "path = src/main/resources, " +
+        "file: src/main/resources/application.conf, " +
+        "url: \"https://pureconfig.github.io\", " +
+        "uri: \"https://pureconfig.github.io/docs/index.html\"" +
+        "}")
+    val pathConfig: PathConfig = configSource.loadOrThrow[PathConfig]
+    pathConfig.path shouldBe java.nio.file.Paths.get(path)
+    pathConfig.file shouldBe new java.io.File(file)
+    pathConfig.url shouldBe new URL(url)
+    pathConfig.uri shouldBe new URI(uri)
   }
 
-
-
-
-
-  /**
-   * `URL`, `URI`,`java.util.UUID`,`java.nio.file.Path`, `java.io.File`
-   * {{{
-   * case class PathConfig(path: java.nio.file.Path, file: java.io.File, url: URL, uri: URI)
-   * }}}
-   *
-   * */
-  def loadOptionalConfig(optionA: Option[String], optionB: Option[String], optionC: Option[Int]): Unit = {
-    val configSource = ConfigSource.string("{ optionA = PureOption, optionC: 101 }")
-    val optionConfig: OptionConfig = configSource.loadOrThrow[OptionConfig]
-    optionConfig.optionA shouldBe optionA
-    optionConfig.optionB shouldBe optionB
-    optionConfig.optionC shouldBe optionC
-  }
-
-  // `java.lang.Enum`,java.math.BigDecimal`, `java.math.BigInteger`, `scala.math.BigDecimal`, `scala.math.BigInt`, `ConfigValue`, `ConfigObject` and `ConfigList`;
- /** Additionally, PureConfig also handles the following collections and composite Scala structures:
-    * `Option`, `TraversableOnce`, `Map[String, *]`, `shapeless.HList` and case classes.
-    * Typesafe ConfigValue, ConfigObject and ConfigList;
-  * {{{
-    * case class Example(name: String, number: Int)
-    * }}}
-  *
-  **/
 }

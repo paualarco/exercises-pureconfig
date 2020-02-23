@@ -71,5 +71,7 @@ object Domain {
                           optionB: Option[String],
                           optionC: Option[Int])
 
-  case class CollectionsConfig(map: Map[String, String])
+  case class CollectionsConfig(list: List[Char],
+                               set: Set[Int],
+                               map: Map[Int, String])
 }

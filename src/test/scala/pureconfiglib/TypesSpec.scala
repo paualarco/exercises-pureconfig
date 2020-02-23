@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,28 +24,47 @@ import shapeless.HNil
 
 class TypesSpec extends RefSpec with Checkers {
 
-  def `check primitive types` = {
-    check(Test.testSuccess(SupportedTypes.loadPrimitivesConfig _, "primitive" :: true :: 2.1d :: 1.0f :: 1 :: 100L :: 1.asInstanceOf[Short] :: 'p' :: HNil))
+  def `load primitive types` = {
+    check(
+      Test.testSuccess(SupportedTypes.loadPrimitivesConfig _,
+                       "primitive" :: true :: 2.1d :: 1.0f :: 1 :: 100L :: 1
+                         .asInstanceOf[Short] :: 'p' :: HNil))
   }
 
-  def `check paths config` = {
-    check(Test.testSuccess(SupportedTypes.loadPathsConfig _, "src/main/resources":: "src/main/resources/application.conf" :: "https://pureconfig.github.io" :: "https://pureconfig.github.io/docs/index.html" :: HNil))
+  def `load paths config` = {
+    check(
+      Test.testSuccess(
+        SupportedTypes.loadPathsConfig _,
+        "src/main/resources" :: "src/main/resources/application.conf" :: "https://pureconfig.github.io" :: "https://pureconfig.github.io/docs/index.html" :: HNil
+      ))
   }
 
-  def `check duration config` = {
-    check(Test.testSuccess(SupportedTypes.loadDurationConfig _, 510 :: 1 :: HNil))
+  def `load duration config` = {
+    check(Test.testSuccess(SupportedTypes.loadDurationConfig _, 1 :: HNil))
   }
 
-  def `check time config` = {
-    check(Test.testSuccess(SupportedTypes.loadTimeConfig _,  2 :: 2020 :: 29 :: 13 :: 21 :: 30 :: HNil))
+  def `load time config` = {
+    check(
+      Test.testSuccess(SupportedTypes.loadTimeConfig _,
+                       2 :: 2020 :: 29 :: 13 :: 21 :: 30 :: HNil))
   }
 
   def `load optional config` = {
-    check(Test.testSuccess(SupportedTypes.loadOptionalConfig _, Option("PureOption") :: None :: Option(101) :: HNil))
+    check(
+      Test.testSuccess(SupportedTypes.loadOptionalConfig _,
+                       Option("PureOption") :: None :: Option(101) :: HNil))
   }
 
   def `load collections config` = {
-    check(Test.testSuccess(SupportedTypes.loadCollectionsConfig _, "src/main/resources" :: HNil))
+    check(
+      Test.testSuccess(
+        SupportedTypes.loadCollectionsConfig _,
+        List('a', 'e', 'i', 'o', 'u') :: Set(1, 2, 3, 4, 5) :: Map(
+          1 -> "A",
+          2 -> "E",
+          3 -> "I",
+          4 -> "O",
+          5 -> "U") :: HNil))
   }
 
 }

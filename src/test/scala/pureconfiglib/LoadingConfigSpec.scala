@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import shapeless.HNil
 
 class LoadingConfigSpec extends RefSpec with Checkers {
 
-  def `check values using loadOrThrow` = {
-    check(Test.testSuccess(LoadingConfig.loadOrThrowExample _, "first" :: 1 :: HNil))
+  def `loads values using loadOrThrow` = {
+    check(
+      Test.testSuccess(LoadingConfig.loadOrThrowExample _,
+                       "first" :: 1 :: HNil))
   }
 
   def `checks if loadOrThrow config is failed` = {
@@ -43,10 +45,14 @@ class LoadingConfigSpec extends RefSpec with Checkers {
   }
 
   def `checks that optional sources falls back to default one` = {
-    check(Test.testSuccess(LoadingConfig.optionalConfig _, Example("fifth", 5) :: HNil))
+    check(
+      Test.testSuccess(LoadingConfig.optionalConfig _,
+                       Example("fifth", 5) :: HNil))
   }
 
   def `checks the a config can be chosen when having multiple sources` = {
-    check(Test.testSuccess(LoadingConfig.multipleSources _, Example("b", 7) :: HNil))
+    check(
+      Test.testSuccess(LoadingConfig.multipleSources _,
+                       Example("b", 7) :: HNil))
   }
 }
