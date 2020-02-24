@@ -24,16 +24,10 @@ import java.time.Month.FEBRUARY
 import org.scalaexercises.definitions._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import pureconfig.ConvertHelpers.catchReadError
 import pureconfig.generic.ProductHint
 import pureconfig.{ConfigSource, _}
-import pureconfiglib.Domain.{
-  CollectionsConfig,
-  DurationConfig,
-  OptionConfig,
-  PathConfig,
-  PrimitivesConf,
-  TimeConfig
-}
+import pureconfiglib.Domain.{ApplicationConfig, CollectionsConfig, DurationConfig, OptionConfig, PathConfig, PrimitivesConf, TimeConfig}
 import pureconfig.configurable._
 
 import scala.language.postfixOps
@@ -47,12 +41,26 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
   implicit def hint[T] =
     ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
-  /** PureConfig comes with baked-in support for many types, most of them from the standard Java and Scala libraries.
+  /**
+   * Before of all, it is important to know that Pureconfig allows you to use different naming conventions for case classes and fields, in which by default,
+   * it expects config kets to be written in kebab case (such as `my-field`) and the associated field names are wiritten in camel case (such as `myField`).
+   * A mapping between different naming conventions is done using a ConfigFieldMapping object, with which one can construct a ProductHint.
+   * - `CamelCase` (examples: `camelCase`, `useMorePureconfig`)
+   * - `SnakeCase` (examples: `snake_case`, `use_more_pureconfig`)
+   * - `KebabCase` (examples: `kebab-case`, `use-more-pureconfig`)
+   * - `PascalCase`: (examples: `PascalCase`, `UseMorePureconfig`)
+   *
+   * These exercises are using the `CamelCase` field mapping hint as:
+   * {{{
+   * implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+   * }}}
+   *
+   * PureConfig also comes with baked-in support for many types, most of them from the standard Java and Scala libraries.
    * In this section we will see an very complete overview of examples with most of the types that pureconfig supports.
    * Each exercise has a `case class` that wraps the values loaded from the configuration source on it.
    *
    * Let's then start with the more basic types, the primitive ones:
-   * `String`, `Boolean`, `Double`, `Float`, `Int`, `Long`, `Short`, `Char`.
+   * String, `Boolean`, `Double`, `Float`, `Int`, `Long`, `Short`, `Char`.
    *
    * In which the wrapper configuration case class in this case is called ´PrimitivesConf´.
    * {{{
@@ -92,8 +100,7 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
     //hint double, float and long can be identified by its suffix respectively: d, f, L
   }
 
-  /**
-   * The default behavior of ConfigReaders that are derived in PureConfig is to return a KeyNotFound
+  /** The default behavior of ConfigReaders that are derived in PureConfig is to return a KeyNotFound
    * failure when a required key is missing unless its type is an Option, in which case it is read as a None.
    * {{{
    * case class OptionConfig(optionA: Option[String], optionB: Option[String], optionC: Option[Int])
@@ -104,15 +111,14 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
                          optionB: Option[String],
                          optionC: Option[Int]): Unit = {
     val configSource =
-      ConfigSource.string("{ optionA = PureOption, optionC: 101 }")
+      ConfigSource.string("{ optionA: PureOption, optionC: 101 }")
     val optionConfig: OptionConfig = configSource.loadOrThrow[OptionConfig]
     optionConfig.optionA shouldBe optionA
     optionConfig.optionB shouldBe optionB
     optionConfig.optionC shouldBe optionC
   }
 
-  /**
-   * Usually, collection types are needed to be defined in configuration files, in which as you may imagine, pureconfig allows to work with them too.
+  /** Usually, collection types are needed to be defined in configuration files, in which as you may imagine, pureconfig allows to work with them too.
    * The following exercise shows an example for `List, `Set` and `Map[Int, String]` from the `scala.collection` package.
    *
    * For some types, PureConfig cannot automatically derive a reader because there are multiple ways to convert a configuration value to them.
@@ -144,8 +150,7 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
     collectionsConfig.map shouldBe map
   }
 
-  /**
-   * When working with dates in configuration, it is also needed to create converters for reading them.
+  /** When working with dates in configuration, it is also needed to create converters for reading them.
    * For example, `LocalDate` in PureConfig cannot derive a reader because there are multiple
    * `DateTimeFormatters that can be used to convert a string into a `LocalDate.
    * Examples of different formats are `yyyy-mm-dd`, e.g. "2016-01-01"`, and `yyyymmdd`, e.g. `"20160101"`.
@@ -193,8 +198,7 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
       LocalTime.of(hours, minues, seconds))
   }
 
-  /**
-   * All those duration types within the scala package `scala.concurrent.durations` also can be read in this format from config sources,
+  /** All those duration types within the scala package `scala.concurrent.durations` also can be read in this format from config sources,
    * in this case with no need of using any converter.
    *
    * {{{
@@ -202,21 +206,21 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
    * }}}
    *
    **/
-  def loadDurationConfig(finiteDuration: Int): Unit = {
+  def loadDurationConfig(finiteDuration: FiniteDuration): Unit = {
 
     val configSource = ConfigSource.string(
       "{ " +
-        "duration = Inf, " +
-        "finiteDuration: 1 hour" +
+        "duration: Inf, " +
+        "finiteDuration: 20 minutes" +
         "}")
     val timeConfig = configSource.loadOrThrow[DurationConfig]
     timeConfig.duration shouldBe Duration.Inf
-    timeConfig.finiteDuration shouldBe (finiteDuration hour)
+    timeConfig.finiteDuration shouldBe finiteDuration
   }
 
   /** Another use case very common when dealing with configurations is to find string paths and urls,
    * in which PureConfig translate them into `java.nio.file.Path`, `java.io.File`, `java.net.URL`, `java.net.URI`.
-   * 
+   *
    * {{{
    * case class PathConfig(path: java.nio.file.Path, file: java.io.File, url: URL, uri: URI)
    * }}}
@@ -239,5 +243,44 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
     pathConfig.url shouldBe new URL(url)
     pathConfig.uri shouldBe new URI(uri)
   }
+
+  /** To fini
+   *
+   * {{{
+   * case class PathConfig(path: java.nio.file.Path, file: java.io.File, url: URL, uri: URI)
+   * }}}
+   *
+   * */
+  def loadApplicationConfig(optionA: Option[String], optionB: Option[String], optionC: Option[Int], list: List[String], set: Set[String], map: Map[Int, String]): Unit = {
+
+    val configSource = ConfigSource.string(
+      "{ " +
+        "optionConf: { optionB: present }, " +
+        "collectionsConf: { list: [], set: [], map: {} }" +
+        "}")
+    implicit val mapReader =
+      genericMapReader[Int, String](catchReadError(_.toInt))
+    implicit val localDateConvert = localDateConfigConvert(
+      DateTimeFormatter.ISO_DATE)
+    implicit val localDateTimeConvert = localDateTimeConfigConvert(
+      DateTimeFormatter.ISO_DATE_TIME)
+    val pathConfig: ApplicationConfig = configSource.loadOrThrow[ApplicationConfig]
+    val optionConfig: OptionConfig = pathConfig.optionConfig.get
+    val collectionConfig: CollectionsConfig = pathConfig.collectionsConfig.get
+
+    pathConfig.primitivesConf.isDefined shouldBe false
+    pathConfig.optionConfig.isDefined shouldBe true
+    pathConfig.collectionsConfig.isDefined shouldBe true
+    pathConfig.timeConfig.isDefined shouldBe false
+    pathConfig.durationConfig.isDefined shouldBe false
+    pathConfig.pathConfig.isDefined shouldBe false
+    optionConfig.optionA shouldBe optionA
+    optionConfig.optionB shouldBe optionB
+    optionConfig.optionC shouldBe optionC
+    collectionConfig.list shouldBe list
+    collectionConfig.set shouldBe set
+    collectionConfig.map shouldBe map
+  }
+
 
 }

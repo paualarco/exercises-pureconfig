@@ -21,6 +21,8 @@ import org.scalaexercises.Test
 import org.scalatestplus.scalacheck.Checkers
 import org.scalatest.refspec.RefSpec
 import shapeless.HNil
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class TypesSpec extends RefSpec with Checkers {
 
@@ -31,28 +33,11 @@ class TypesSpec extends RefSpec with Checkers {
                          .asInstanceOf[Short] :: 'p' :: HNil))
   }
 
-  def `load paths config` = {
-    check(
-      Test.testSuccess(
-        SupportedTypes.loadPathsConfig _,
-        "src/main/resources" :: "src/main/resources/application.conf" :: "https://pureconfig.github.io" :: "https://pureconfig.github.io/docs/index.html" :: HNil
-      ))
-  }
-
-  def `load duration config` = {
-    check(Test.testSuccess(SupportedTypes.loadDurationConfig _, 1 :: HNil))
-  }
-
-  def `load time config` = {
-    check(
-      Test.testSuccess(SupportedTypes.loadTimeConfig _,
-                       2 :: 2020 :: 29 :: 13 :: 21 :: 30 :: HNil))
-  }
 
   def `load optional config` = {
     check(
       Test.testSuccess(SupportedTypes.loadOptionalConfig _,
-                       Option("PureOption") :: None :: Option(101) :: HNil))
+        Option("PureOption") :: None :: Option(101) :: HNil))
   }
 
   def `load collections config` = {
@@ -66,5 +51,32 @@ class TypesSpec extends RefSpec with Checkers {
           4 -> "O",
           5 -> "U") :: HNil))
   }
+
+  def `load time config` = {
+    check(
+      Test.testSuccess(SupportedTypes.loadTimeConfig _,
+        2 :: 2020 :: 29 :: 13 :: 21 :: 30 :: HNil))
+  }
+
+  def `load duration config` =
+    check(Test.testSuccess(SupportedTypes.loadDurationConfig _, (20 minutes) :: HNil))
+
+  def `load paths config` = {
+    check(
+      Test.testSuccess(
+        SupportedTypes.loadPathsConfig _,
+        "src/main/resources" :: "src/main/resources/application.conf" :: "https://pureconfig.github.io" :: "https://pureconfig.github.io/docs/index.html" :: HNil
+      ))
+  }
+
+  def `load case class config` = {
+    check(
+      Test.testSuccess(
+        SupportedTypes.loadApplicationConfig _,
+        None :: Option("present") :: None :: List() :: Set() :: Map() :: HNil
+      ))
+  }
+
+
 
 }

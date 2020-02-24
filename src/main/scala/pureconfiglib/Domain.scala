@@ -30,6 +30,7 @@ object Domain {
   case class Example(name: String, number: Int)
 
   final case class OtherStuff(pool: Boolean, gym: Boolean)
+
   case class Flat(isCurrentlyRented: Boolean,
                   number: Int,
                   street: String,
@@ -48,7 +49,6 @@ object Domain {
     }
 """)
 
-  //`String`, `Boolean`, `Double`, `Float`, `Int`, `Long`, `Short`, `Char`.
   case class PrimitivesConf(string: String,
                             bool: Boolean,
                             double: Double,
@@ -58,15 +58,6 @@ object Domain {
                             short: Short,
                             char: Char)
 
-  //`URL`, `URI`,`java.util.UUID`,`java.nio.file.Path`, `java.io.File`,`java.util.regex.Pattern`, `scala.util.matching.Regex`
-  case class PathConfig(path: java.nio.file.Path,
-                        file: java.io.File,
-                        url: URL,
-                        uri: URI)
-
-  case class DurationConfig(duration: Duration, finiteDuration: FiniteDuration)
-  case class TimeConfig(localDate: LocalDate, localDateTime: LocalDateTime)
-
   case class OptionConfig(optionA: Option[String],
                           optionB: Option[String],
                           optionC: Option[Int])
@@ -74,4 +65,21 @@ object Domain {
   case class CollectionsConfig(list: List[Char],
                                set: Set[Int],
                                map: Map[Int, String])
+
+  case class TimeConfig(localDate: LocalDate, localDateTime: LocalDateTime)
+
+  case class DurationConfig(duration: Duration, finiteDuration: FiniteDuration)
+
+  case class PathConfig(path: java.nio.file.Path,
+                        file: java.io.File,
+                        url: URL,
+                        uri: URI)
+
+  case class ApplicationConfig(primitivesConf: Option[PrimitivesConf],
+                               optionConfig: Option[OptionConfig],
+                               collectionsConfig: Option[CollectionsConfig],
+                               timeConfig: Option[TimeConfig],
+                               durationConfig: Option[DurationConfig],
+                               pathConfig: Option[PathConfig]
+                              )
 }
