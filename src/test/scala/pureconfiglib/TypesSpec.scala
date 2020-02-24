@@ -28,15 +28,16 @@ class TypesSpec extends RefSpec with Checkers {
 
   def `load primitive types` = {
     check(
-      Test.testSuccess(SupportedTypes.loadPrimitivesConfig _,
-                       "primitive" :: true :: 2.1d :: 1.0f :: 1 :: 100L :: 1
-                         .asInstanceOf[Short] :: 'p' :: HNil))
+      Test.testSuccess(
+        SupportedTypes.loadPrimitivesConfig _,
+        "primitive" :: true :: 2.1d :: 1.0f :: 1 :: 100L :: 1
+          .asInstanceOf[Short] :: 'p' :: HNil))
   }
-
 
   def `load optional config` = {
     check(
-      Test.testSuccess(SupportedTypes.loadOptionalConfig _,
+      Test.testSuccess(
+        SupportedTypes.loadOptionalConfig _,
         Option("PureOption") :: None :: Option(101) :: HNil))
   }
 
@@ -54,8 +55,7 @@ class TypesSpec extends RefSpec with Checkers {
 
   def `load time config` = {
     check(
-      Test.testSuccess(SupportedTypes.loadTimeConfig _,
-        2 :: 2020 :: 29 :: 13 :: 21 :: 30 :: HNil))
+      Test.testSuccess(SupportedTypes.loadTimeConfig _, 2 :: 2020 :: 29 :: 13 :: 21 :: 30 :: HNil))
   }
 
   def `load duration config` =
@@ -69,14 +69,11 @@ class TypesSpec extends RefSpec with Checkers {
       ))
   }
 
-  def `load case class config` = {
-    check(
-      Test.testSuccess(
-        SupportedTypes.loadApplicationConfig _,
-        None :: Option("present") :: None :: List() :: Set() :: Map() :: HNil
-      ))
+  def `load application config` = {
+    check(Test.testSuccess(
+      SupportedTypes.loadApplicationConfig _,
+      None :: Option("present") :: None :: List[String]() :: Set[String]() :: Map[Int, String]() :: HNil
+    ))
   }
-
-
 
 }

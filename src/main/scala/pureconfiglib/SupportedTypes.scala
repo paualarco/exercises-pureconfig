@@ -27,12 +27,20 @@ import org.scalatest.matchers.should.Matchers
 import pureconfig.ConvertHelpers.catchReadError
 import pureconfig.generic.ProductHint
 import pureconfig.{ConfigSource, _}
-import pureconfiglib.Domain.{ApplicationConfig, CollectionsConfig, DurationConfig, OptionConfig, PathConfig, PrimitivesConf, TimeConfig}
+import pureconfiglib.Domain.{
+  ApplicationConfig,
+  CollectionsConfig,
+  DurationConfig,
+  OptionConfig,
+  PathConfig,
+  PrimitivesConf,
+  TimeConfig
+}
 import pureconfig.configurable._
+import pureconfig.generic.auto._
 
 import scala.language.postfixOps
 import scala.concurrent.duration._
-import pureconfig.generic.auto._
 
 /** @param name Supported Types
  */
@@ -69,14 +77,15 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
    *
    *
    * */
-  def loadPrimitivesConfig(string: String,
-                           bool: Boolean,
-                           double: Double,
-                           float: Float,
-                           int: Int,
-                           long: Long,
-                           short: Short,
-                           char: Char): Unit = {
+  def loadPrimitivesConfig(
+      string: String,
+      bool: Boolean,
+      double: Double,
+      float: Float,
+      int: Int,
+      long: Long,
+      short: Short,
+      char: Char): Unit = {
     val primitivesSource = ConfigSource.string(
       "{ " +
         "string = primitive, " +
@@ -107,9 +116,10 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
    * }}}
    *
    **/
-  def loadOptionalConfig(optionA: Option[String],
-                         optionB: Option[String],
-                         optionC: Option[Int]): Unit = {
+  def loadOptionalConfig(
+      optionA: Option[String],
+      optionB: Option[String],
+      optionC: Option[Int]): Unit = {
     val configSource =
       ConfigSource.string("{ optionA: PureOption, optionC: 101 }")
     val optionConfig: OptionConfig = configSource.loadOrThrow[OptionConfig]
@@ -132,9 +142,7 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
    * }}}
    *
    **/
-  def loadCollectionsConfig(list: List[Char],
-                            set: Set[Int],
-                            map: Map[Int, String]): Unit = {
+  def loadCollectionsConfig(list: List[Char], set: Set[Int], map: Map[Int, String]): Unit = {
     import pureconfig.ConvertHelpers._
     implicit val mapReader =
       genericMapReader[Int, String](catchReadError(_.toInt))
@@ -176,22 +184,21 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
    * }}}
    *
    **/
-  def loadTimeConfig(month: Int,
-                     year: Int,
-                     day: Int,
-                     hours: Int,
-                     minues: Int,
-                     seconds: Int): Unit = {
+  def loadTimeConfig(
+      month: Int,
+      year: Int,
+      day: Int,
+      hours: Int,
+      minues: Int,
+      seconds: Int): Unit = {
     val configSource = ConfigSource.string(
       "{ " +
         "localDate: 2020-02-29, " +
         "localDateTime: \"2020-02-29T13:21:30\"" +
         "}")
-    implicit val localDateConvert = localDateConfigConvert(
-      DateTimeFormatter.ISO_DATE)
-    implicit val localDateTimeConvert = localDateTimeConfigConvert(
-      DateTimeFormatter.ISO_DATE_TIME)
-    val timeConfig = configSource.loadOrThrow[TimeConfig]
+    implicit val localDateConvert     = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
+    implicit val localDateTimeConvert = localDateTimeConfigConvert(DateTimeFormatter.ISO_DATE_TIME)
+    val timeConfig                    = configSource.loadOrThrow[TimeConfig]
     timeConfig.localDate shouldBe LocalDate.of(year, FEBRUARY, day)
     timeConfig.localDateTime shouldBe LocalDateTime.of(
       timeConfig.localDate,
@@ -226,10 +233,7 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
    * }}}
    *
    * */
-  def loadPathsConfig(path: String,
-                      file: String,
-                      url: String,
-                      uri: String): Unit = {
+  def loadPathsConfig(path: String, file: String, url: String, uri: String): Unit = {
     val configSource = ConfigSource.string(
       "{ " +
         "path = src/main/resources, " +
@@ -244,28 +248,42 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
     pathConfig.uri shouldBe new URI(uri)
   }
 
-  /** To fini
+  /** To finish, the following exercise is a combination of all the above use case in the same config source,
+   * being seen as the representation of the application config.
+   * As you would notice, only fields for option and collections configuration have been defined in the sours,
+   * however, the `ApplicationConf` does have all the sub configurations defined as an option.
+   * Also in this case the converters for `Map` and `java.time._` types are needed even if they are not present in the
+   * config source, but because they were declared in the `case class`.
    *
    * {{{
-   * case class PathConfig(path: java.nio.file.Path, file: java.io.File, url: URL, uri: URI)
-   * }}}
+   * case class ApplicationConfig(primitivesConf: Option[PrimitivesConf],
+                               optionConfig: Option[OptionConfig],
+                               collectionsConfig: Option[CollectionsConfig],
+                               timeConfig: Option[TimeConfig],
+                               durationConfig: Option[DurationConfig],
+                               pathConfig: Option[PathConfig]
+                              )   * }}}
    *
    * */
-  def loadApplicationConfig(optionA: Option[String], optionB: Option[String], optionC: Option[Int], list: List[String], set: Set[String], map: Map[Int, String]): Unit = {
+  def loadApplicationConfig(
+      optionA: Option[String],
+      optionB: Option[String],
+      optionC: Option[Int],
+      list: List[String],
+      set: Set[String],
+      map: Map[Int, String]): Unit = {
 
     val configSource = ConfigSource.string(
       "{ " +
-        "optionConf: { optionB: present }, " +
-        "collectionsConf: { list: [], set: [], map: {} }" +
+        "optionConfig: { optionB: present }, " +
+        "collectionsConfig: { list: [], set: [], map: {} }" +
         "}")
     implicit val mapReader =
       genericMapReader[Int, String](catchReadError(_.toInt))
-    implicit val localDateConvert = localDateConfigConvert(
-      DateTimeFormatter.ISO_DATE)
-    implicit val localDateTimeConvert = localDateTimeConfigConvert(
-      DateTimeFormatter.ISO_DATE_TIME)
-    val pathConfig: ApplicationConfig = configSource.loadOrThrow[ApplicationConfig]
-    val optionConfig: OptionConfig = pathConfig.optionConfig.get
+    implicit val localDateConvert           = localDateConfigConvert(DateTimeFormatter.ISO_DATE)
+    implicit val localDateTimeConvert       = localDateTimeConfigConvert(DateTimeFormatter.ISO_DATE_TIME)
+    val pathConfig: ApplicationConfig       = configSource.loadOrThrow[ApplicationConfig]
+    val optionConfig: OptionConfig          = pathConfig.optionConfig.get
     val collectionConfig: CollectionsConfig = pathConfig.collectionsConfig.get
 
     pathConfig.primitivesConf.isDefined shouldBe false
@@ -281,6 +299,5 @@ object SupportedTypes extends AnyFlatSpec with Matchers with Section {
     collectionConfig.set shouldBe set
     collectionConfig.map shouldBe map
   }
-
 
 }

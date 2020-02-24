@@ -31,12 +31,13 @@ object Domain {
 
   final case class OtherStuff(pool: Boolean, gym: Boolean)
 
-  case class Flat(isCurrentlyRented: Boolean,
-                  number: Int,
-                  street: String,
-                  pets: List[Double],
-                  tenants: Map[String, TenantInfo],
-                  mayBe: Option[String])
+  case class Flat(
+      isCurrentlyRented: Boolean,
+      number: Int,
+      street: String,
+      pets: List[Double],
+      tenants: Map[String, TenantInfo],
+      mayBe: Option[String])
 
   val multiExampleSource = ConfigSource.string("""
     example-a: {
@@ -49,37 +50,31 @@ object Domain {
     }
 """)
 
-  case class PrimitivesConf(string: String,
-                            bool: Boolean,
-                            double: Double,
-                            float: Float,
-                            int: Int,
-                            long: Long,
-                            short: Short,
-                            char: Char)
+  case class PrimitivesConf(
+      string: String,
+      bool: Boolean,
+      double: Double,
+      float: Float,
+      int: Int,
+      long: Long,
+      short: Short,
+      char: Char)
 
-  case class OptionConfig(optionA: Option[String],
-                          optionB: Option[String],
-                          optionC: Option[Int])
+  case class OptionConfig(optionA: Option[String], optionB: Option[String], optionC: Option[Int])
 
-  case class CollectionsConfig(list: List[Char],
-                               set: Set[Int],
-                               map: Map[Int, String])
+  case class CollectionsConfig(list: List[Char], set: Set[Int], map: Map[Int, String])
 
   case class TimeConfig(localDate: LocalDate, localDateTime: LocalDateTime)
 
   case class DurationConfig(duration: Duration, finiteDuration: FiniteDuration)
 
-  case class PathConfig(path: java.nio.file.Path,
-                        file: java.io.File,
-                        url: URL,
-                        uri: URI)
+  case class PathConfig(path: java.nio.file.Path, file: java.io.File, url: URL, uri: URI)
 
-  case class ApplicationConfig(primitivesConf: Option[PrimitivesConf],
-                               optionConfig: Option[OptionConfig],
-                               collectionsConfig: Option[CollectionsConfig],
-                               timeConfig: Option[TimeConfig],
-                               durationConfig: Option[DurationConfig],
-                               pathConfig: Option[PathConfig]
-                              )
+  case class ApplicationConfig(
+      primitivesConf: Option[PrimitivesConf],
+      optionConfig: Option[OptionConfig],
+      collectionsConfig: Option[CollectionsConfig],
+      timeConfig: Option[TimeConfig],
+      durationConfig: Option[DurationConfig],
+      pathConfig: Option[PathConfig])
 }
