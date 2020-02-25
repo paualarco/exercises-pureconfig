@@ -23,11 +23,12 @@ import org.scalatestplus.scalacheck.Checkers
 import pureconfiglib.Domain.Example
 import shapeless.HNil
 
+import scala.concurrent.Future
+
 class LoadingConfigSpec extends RefSpec with Checkers {
 
-  def `loads values using loadOrThrow` = {
+  def `loads values using loadOrThrow` =
     check(Test.testSuccess(LoadingConfig.loadOrThrowExample _, "first" :: 1 :: HNil))
-  }
 
   def `checks if loadOrThrow config is failed` =
     check(Test.testSuccess(LoadingConfig.loadOrThrowFailure _, true :: HNil))
@@ -38,11 +39,10 @@ class LoadingConfigSpec extends RefSpec with Checkers {
   def `checks merged source is overwritten` =
     check(Test.testSuccess(LoadingConfig.mergeSources _, "easy" :: 4 :: HNil))
 
-  def `checks that optional sources falls back to default one` = {
+  def `checks that optional sources falls back to default one` =
     check(Test.testSuccess(LoadingConfig.optionalConfig _, Example("fifth", 5) :: HNil))
-  }
 
-  def `checks the a config can be chosen when having multiple sources` = {
+  def `checks the a config can be chosen when having multiple sources` =
     check(Test.testSuccess(LoadingConfig.multipleSources _, Example("b", 7) :: HNil))
-  }
+
 }

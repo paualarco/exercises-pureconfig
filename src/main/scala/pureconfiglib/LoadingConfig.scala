@@ -130,7 +130,7 @@ object LoadingConfig extends AnyFlatSpec with Matchers with Section {
 
    multiExampleSource.at("example-a").load[Example]
    * }}}
-   *   *
+   *
    */
   def multipleSources(example: Example): Unit = {
     val exampleB = multiExampleSource.at("example-b").load[Example]

@@ -8,7 +8,7 @@ lazy val template = (project in file("."))
     organization := "org.scala-exercises",
     name := "exercises-template",
     scalaVersion := "2.13.1",
-    version := "0.5.0-SNAPSHOT",
+    version := "0.0.1",
     resolvers ++= Seq(
       Resolver.sonatypeRepo("snapshots"),
       Resolver.sonatypeRepo("releases")

@@ -25,12 +25,12 @@ import org.scalaexercises.definitions._
 object PureConfigLibrary extends Library {
   override def owner      = "scala-exercises"
   override def repository = "exercises-pureconfig"
-  override def color      = Some("#323232")
+  override def color      = Some("#C70039")
 
   override def sections = List(
     LoadingConfig,
     SupportedTypes
   )
 
-  override def logoPath = ""
+  override def logoPath = "pureconfig"
 }
