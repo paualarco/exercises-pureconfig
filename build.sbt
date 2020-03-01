@@ -6,7 +6,7 @@ lazy val template = (project in file("."))
   .enablePlugins(ExerciseCompilerPlugin)
   .settings(
     organization := "org.scala-exercises",
-    name := "exercises-template",
+    name := "exercises-pureconfig",
     scalaVersion := "2.13.1",
     version := "0.0.1",
     resolvers ++= Seq(
